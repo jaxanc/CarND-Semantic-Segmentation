@@ -121,13 +121,19 @@ def gen_test_output(sess, logits, keep_prob, image_pl, data_folder, image_shape)
         im_softmax = sess.run(
             [tf.nn.softmax(logits)],
             {keep_prob: 1.0, image_pl: [image]})
-        im_softmax = im_softmax[0][:, 1].reshape(image_shape[0], image_shape[1])
-        segmentation = (im_softmax > 0.5).reshape(image_shape[0], image_shape[1], 1)
+        road_softmax = im_softmax[0][:, 1].reshape(image_shape[0], image_shape[1])
+        segmentation = (road_softmax > 0.5).reshape(image_shape[0], image_shape[1], 1)
         mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
         mask = scipy.misc.toimage(mask, mode="RGBA")
 
+        side_softmax = im_softmax[0][:, 2].reshape(image_shape[0], image_shape[1])
+        side_segmentation = (side_softmax > 0.5).reshape(image_shape[0], image_shape[1], 1)
+        side_mask = np.dot(side_segmentation, np.array([[0, 0, 255, 127]]))
+        side_mask = scipy.misc.toimage(side_mask, mode="RGBA")
+
         street_im = scipy.misc.toimage(image)
         street_im.paste(mask, box=None, mask=mask)
+        street_im.paste(side_mask, box=None, mask=side_mask)
 
         yield os.path.basename(image_file), np.array(street_im)
 
