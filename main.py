@@ -54,38 +54,42 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :param num_classes: Number of classes to classify
     :return: The Tensor for the last layer of output
     """
-    # Apply normilzation for this images
-    kernel_initializer = tf.truncated_normal_initializer(stddev=0.01)
 
     # Apply 1x1 convolution to layer 7 of Vgg with Regularization to avoid overfitting
     vgg_layer7_1x1 = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, padding='same', strides=(1, 1),
-                                      kernel_initializer=kernel_initializer)
+                                      kernel_initializer=tf.random_normal_initializer(stddev=0.01),
+                                      kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # Upsample the image
     layer7_upsample = tf.layers.conv2d_transpose(vgg_layer7_1x1, num_classes, 4, strides=(2, 2), padding='same',
-                                                 kernel_initializer= kernel_initializer)
+                                                 kernel_initializer=tf.random_normal_initializer(stddev=0.01),
+                                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # Apply 1x1 convolution to layer 4 of Vgg with Regulartization to avoid overfitting
     vgg_layer4_1x1 = tf.layers.conv2d(vgg_layer4_out, num_classes, 1, padding='same', strides=(1, 1),
-                                      kernel_initializer= kernel_initializer)
+                                      kernel_initializer=tf.random_normal_initializer(stddev=0.01),
+                                      kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # Add Skip connection from layer 4
     decode_layer_1_with_skip = tf.add(layer7_upsample, vgg_layer4_1x1)
 
     # Upsample with another transposed convolution layer
     decode_layer_2 = tf.layers.conv2d_transpose(decode_layer_1_with_skip, num_classes, 4, strides=(2, 2), padding='same',
-                                                kernel_initializer=kernel_initializer)
+                                                kernel_initializer=tf.random_normal_initializer(stddev=0.01),
+                                                kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # Apply 1x1 convolution to layer 3 of Vgg with Regulartization to avoid overfitting
     vgg_layer3_1x1 = tf.layers.conv2d(vgg_layer3_out, num_classes, 1, padding='same', strides=(1, 1),
-                                      kernel_initializer=kernel_initializer)
+                                      kernel_initializer=tf.random_normal_initializer(stddev=0.01),
+                                      kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # Add Skip connection from layer 3
     decode_layer_2_with_skip = tf.add(decode_layer_2, vgg_layer3_1x1)
 
     # Upsample one last time to get original image size
     decoder_output = tf.layers.conv2d_transpose(decode_layer_2_with_skip, num_classes, 16, strides=(8, 8), padding='same',
-                                                kernel_initializer=kernel_initializer)
+                                                kernel_initializer=tf.random_normal_initializer(stddev=0.01),
+                                                kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     return decoder_output
 tests.test_layers(layers)
@@ -137,8 +141,8 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
             _, loss = sess.run([train_op, cross_entropy_loss],
                                feed_dict={input_image: image,
                                           correct_label: label,
-                                          keep_prob: 0.5,
-                                          learning_rate: 0.0009})
+                                          keep_prob: 0.7,
+                                          learning_rate: 0.0005})
             print("loss", loss, " epoch ", i)
 tests.test_train_nn(train_nn)
 
@@ -149,7 +153,7 @@ def run():
     runs_dir = './runs'
     tests.test_for_kitti_dataset(data_dir)
 
-    epochs = 20
+    epochs = 50
     batch_size = 16
 
     correct_label = tf.placeholder(tf.int32, [None, None, None, num_classes], name='correct_label')
