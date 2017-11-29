@@ -1,5 +1,36 @@
 # Semantic Segmentation
+
+## Hyper parameters used
+
+- keep probability: 0.7
+- learning rate: 0.0005
+- epochs: 50
+- batch: 16
+
+## Samples
+
+![alt text][sample001]
+![alt text][sample002]
+![alt text][sample003]
+![alt text][sample004]
+![alt text][sample005]
+![alt text][sample006]
+![alt text][sample007]
+![alt text][sample008]
+![alt text][sample009]
+
+[sample001]: sample001.png "sample001"
+[sample002]: sample002.png "sample002"
+[sample003]: sample003.png "sample003"
+[sample004]: sample004.png "sample004"
+[sample005]: sample005.png "sample005"
+[sample006]: sample006.png "sample006"
+[sample007]: sample007.png "sample007"
+[sample008]: sample008.png "sample008"
+[sample009]: sample009.png "sample009"
+
 ### Introduction
+
 In this project, you'll label the pixels of a road in images using a Fully Convolutional Network (FCN).
 
 ### Setup
